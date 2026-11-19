@@ -1,0 +1,4 @@
+1. Install the GitHub CLI (https://cli.github.com) and run: gh auth login
+2. Run: bash create_issues.sh
+   It creates 6 labels, 4 milestones and 22 issues, and pins "How we work".
+   Run it only once, or you'll get duplicate issues.
