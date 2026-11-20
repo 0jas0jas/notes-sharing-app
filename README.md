@@ -13,23 +13,29 @@ You need **Git** and **Bun**. Bun replaces npm/node for installing packages and 
 ### Install Bun
 
 **macOS / Linux**
+
 ```bash
 curl -fsSL https://bun.sh/install | bash
 ```
+
 Then restart your terminal (or run `source ~/.zshrc` / `source ~/.bashrc`).
 
 **Windows** (PowerShell)
+
 ```powershell
 powershell -c "irm bun.sh/install.ps1 | iex"
 ```
+
 Then close and reopen PowerShell.
 
 **Check it worked**
+
 ```bash
 bun --version
 ```
 
 ### Install Git (if you don't have it)
+
 - macOS: `xcode-select --install`
 - Windows: https://git-scm.com/download/win
 - Check: `git --version`
@@ -67,12 +73,12 @@ Run this again whenever someone adds a package (if `package.json` changed after 
 
 Secrets live in `.env.local`, which is **gitignored. Never commit it.**
 
-1. Copy the example file:
+1. Create a new file called `.env.local`:
    ```bash
-   cp .env.example .env.local
+   touch .env.local
    ```
-   (Windows PowerShell: `Copy-Item .env.example .env.local`)
-2. Fill in the values. Get them from the team chat, or from **Supabase Dashboard → Project Settings → API**.
+   (Windows PowerShell: `New-Item -Name ".env.local" -ItemType File`)
+2. Fill in the values below. Get them from the team chat, or from **Supabase Dashboard → Project Settings → API**.
 
 ```env
 # Supabase (Project Settings → API)
@@ -84,6 +90,7 @@ MICROLINK_API_KEY=
 ```
 
 Notes:
+
 - Anything starting with `NEXT_PUBLIC_` is visible in the browser. That's fine for the anon key, because Row Level Security protects the data.
 - **Never** put the Supabase `service_role` / secret key in a `NEXT_PUBLIC_` variable, and never commit it.
 - After changing `.env.local`, restart `bun dev`.
@@ -100,13 +107,13 @@ Open http://localhost:3000.
 
 Other scripts:
 
-| Command | What it does |
-|---|---|
-| `bun dev` | Start the dev server with hot reload |
+| Command         | What it does                                                   |
+| --------------- | -------------------------------------------------------------- |
+| `bun dev`       | Start the dev server with hot reload                           |
 | `bun run build` | Production build. Run this before opening a PR to catch errors |
-| `bun start` | Run the production build locally |
-| `bun run lint` | Check for lint errors |
-| `bun add <pkg>` | Add a package (tell the team, it counts toward our 30%) |
+| `bun start`     | Run the production build locally                               |
+| `bun run lint`  | Check for lint errors                                          |
+| `bun add <pkg>` | Add a package (tell the team, it counts toward our 30%)        |
 
 ---
 
@@ -122,12 +129,14 @@ dbSQLScripts/
 ```
 
 **Workflow for any schema change:**
+
 1. Write the SQL in the right `dbSQLScripts/` file, or in a new numbered file such as `04_add_tags.sql`.
 2. Paste it into **Dashboard → SQL Editor** and run it.
 3. Commit the file in the same PR as the code that uses it.
 4. Post in the team chat that you changed the schema.
 
 **Rules:**
+
 - Use the **SQL Editor**, not the Table Editor. Click-to-add columns leave no SQL behind.
 - Don't edit an old `create table` after it's been run. Add an `alter table ...` statement instead, so the files always match the real database.
 - Every table needs RLS turned on, with policies.
@@ -155,6 +164,7 @@ git push origin feat/<short-name>
 Then open a Pull Request on GitHub from your branch into `0jas0jas/notes-sharing-app` `main`, and link the issue (`Closes #12`).
 
 **Keeping your branch up to date:**
+
 ```bash
 git pull upstream main
 ```
@@ -178,19 +188,20 @@ These affect our grade directly.
 
 ## 9. Troubleshooting
 
-| Problem | Fix |
-|---|---|
-| `bun: command not found` | Restart your terminal. If it still fails, rerun the install command. |
-| Supabase errors / `Invalid API key` | Check `.env.local` values, then restart `bun dev`. |
-| Page loads but no data | Probably RLS. Check the policies for that table in `dbSQLScripts/02_policies.sql`. |
-| Port 3000 in use | `bun dev -- -p 3001` |
-| Weird errors after pulling | `bun install`, then restart `bun dev`. If it's still broken, delete `.next/` and try again. |
+| Problem                             | Fix                                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| `bun: command not found`            | Restart your terminal. If it still fails, rerun the install command.                        |
+| Supabase errors / `Invalid API key` | Check `.env.local` values, then restart `bun dev`.                                          |
+| Page loads but no data              | Probably RLS. Check the policies for that table in `dbSQLScripts/02_policies.sql`.          |
+| Port 3000 in use                    | `bun dev -- -p 3001`                                                                        |
+| Weird errors after pulling          | `bun install`, then restart `bun dev`. If it's still broken, delete `.next/` and try again. |
 
 ---
 
 ## Before we submit
 
 The final submission needs a separate **README.txt** with:
+
 - [ ] The URL of the running website
 - [ ] A table with each teammate's name, student ID and the code they worked on
 - [ ] A description of the 30% not coded by us (from `THIRD_PARTY.md`)
