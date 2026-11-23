@@ -30,10 +30,6 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }, //The curly brackets are used to destructure JSON data
 ) {
-  // The "await" keyword forces JS to wait for the result before continuing
-  // something something asychronous programming
-  const supabase = await createClient();
-
   //Get the ID of the resource (document) we currently have
   const { id } = await params;
   const resourceId = Number(id);
@@ -43,6 +39,10 @@ export async function POST(
   if (!Number.isSafeInteger(resourceId) || resourceId <= 0) {
     return NextResponse.json({ error: "Invalid Resource ID" }, { status: 400 });
   }
+
+  // The "await" keyword forces JS to wait for the result before continuing
+  // something something asychronous programming
+  const supabase = await createClient();
 
   //Get (and confirm) current user
   const {

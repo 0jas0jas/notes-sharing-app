@@ -47,6 +47,11 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  //Handle calls to API scripts from users that are not logged in
+  if (!user && request.nextUrl.pathname.startsWith("/api")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&
