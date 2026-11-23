@@ -11,6 +11,8 @@ export function LogoutButton() {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/auth/login");
+    // Re-render server components (the navbar in the layout) without the session.
+    router.refresh();
   };
 
   return (
