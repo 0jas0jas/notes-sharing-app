@@ -7,6 +7,8 @@ Our database is Supabase Postgres. All of it is defined by the SQL files in this
 | `01_schema.sql` | Tables, constraints, the `resources_with_stats` view, sign-up triggers |
 | `02_policies.sql` | Row Level Security: who can read and change what |
 | `03_seed.sql` | Starter McGill courses for the demo |
+| `04_remove_mcgill_trigger.sql` | Removes the McGill trigger from `01` (the auth hook replaces it) |
+| `checkifmcgill.sql` | The McGill-only sign-up check, used as a Supabase auth hook |
 
 ---
 
@@ -16,10 +18,13 @@ Our database is Supabase Postgres. All of it is defined by the SQL files in this
 2. Paste `01_schema.sql` and run it.
 3. Paste `02_policies.sql` and run it.
 4. Paste `03_seed.sql` and run it.
+5. Paste `04_remove_mcgill_trigger.sql` and run it.
+6. Paste `checkifmcgill.sql` and run it.
+7. Dashboard → **Authentication → Hooks** → add a **Before User Created** hook → type **Postgres** → schema `public` → function `hook_mcgill_email_only`. **This step is manual. Without it, anyone can sign up.**
 
 Order matters: policies need the tables, and the seed needs `courses`.
 
-`01` and `02` can only run **once** on a fresh database. Running them again errors with "already exists". `03` is safe to re-run.
+`01` and `02` can only run **once** on a fresh database. Running them again errors with "already exists". `03`, `04` and `checkifmcgill.sql` are safe to re-run.
 
 ---
 
@@ -150,7 +155,7 @@ RLS is turned on for every table. The rules are:
 
 "Your own" means the row's `user_id` / `uploader_id` matches the logged-in user. The **database** enforces this, not our code. If someone calls the API to delete another person's resource, nothing happens (0 rows affected, no error), so check the result if you need to show a message.
 
-**McGill-only sign-up:** a trigger on `auth.users` rejects any email that doesn't end in `@mail.mcgill.ca` or `@mcgill.ca`. Supabase shows this as a generic *"Database error saving new user"*, so **also check the email in the sign-up form** to show a clear message first.
+**McGill-only sign-up:** the `hook_mcgill_email_only` auth hook (`checkifmcgill.sql`) rejects any email that doesn't end in `@mail.mcgill.ca` or `@mcgill.ca`. It runs on Supabase's server, so going around the form doesn't get past it. `supabase.auth.signUp()` returns the error *"Please sign up with your McGill email (@mail.mcgill.ca or @mcgill.ca)."*, which the sign-up form can show as-is.
 
 ---
 
@@ -219,7 +224,7 @@ await supabase
 
 ## Starting over (dev only)
 
-To wipe everything and re-run 01 → 03, run this in the SQL Editor. **It deletes all data.**
+To wipe everything and re-run the setup steps from 2 to 5, run this in the SQL Editor. The auth hook isn't touched, so steps 6 and 7 don't need repeating. **It deletes all data.**
 
 ```sql
 drop view  if exists public.resources_with_stats;
