@@ -83,7 +83,7 @@ Secrets live in `.env.local`, which is **gitignored. Never commit it.**
 ```env
 # Supabase (Project Settings → API)
 NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon / publishable key>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<anon / publishable key>
 
 # Microlink (optional: the free tier works without a key)
 MICROLINK_API_KEY=
