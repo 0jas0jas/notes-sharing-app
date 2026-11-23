@@ -98,7 +98,7 @@ export async function POST(
   const { data: votes, error: votesError } = await supabase
     .from("votes")
     .select("value")
-    .eq("resouce_id", resourceId);
+    .eq("resource_id", resourceId);
 
   if (votesError) {
     return NextResponse.json({ error: votesError.message }, { status: 500 });
