@@ -47,13 +47,16 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const { pathname } = request.nextUrl;
+
+  // Logged-out users can only see the landing page and the /auth pages.
+  if (pathname !== "/" && !user && !pathname.startsWith("/auth")) {
+    // API routes answer with JSON instead of redirecting to an HTML page.
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Not logged in" }, { status: 401 });
+    }
+
+    // Pages send the user to the login page.
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
