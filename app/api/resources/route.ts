@@ -121,7 +121,7 @@ export async function POST(request: Request) {
         .select(`
             id, title, description, url, fileType:file_type,
             createdAt:created_at, previewTitle:preview_title, previewImage:preview_image,
-            course:courses(id, code), uploader:profiles(id, name:display_name)
+            course:courses(id, code), uploader:profiles!resources_uploader_id_fkey(id, name:display_name)
         `)
         .single();
 
