@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getPreview } from "@/lib/microlink";
 
 export async function POST(request: Request) {
     const supabase = await createClient();
@@ -101,14 +102,17 @@ export async function POST(request: Request) {
         return Response.json({ error: "Course not found" }, { status: 404 });
     }
 
+    // Fetch the preview after the course has been validated.
+    const preview = await getPreview(url);
+
     const newResource = {
         course_id: courseId,
         title,
         description,
         url,
         file_type: fileType,
-        preview_title: null,
-        preview_image: null,
+        preview_title: preview.title,
+        preview_image: preview.image,
     };
 
     const insertQuery = supabase
