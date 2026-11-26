@@ -9,12 +9,10 @@
  *       so I'm going to be leaving a lot of redundant comments to remind myself
  *       what the hell I'm doing for future use.
  *
- * IMPORTANT NOTE: This code hasn't been tested yet.
  ***********************************/
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Handles Post methods
