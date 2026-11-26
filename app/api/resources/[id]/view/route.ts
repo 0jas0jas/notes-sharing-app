@@ -36,7 +36,7 @@ export async function POST(
   // Fetch existing data
 
   const { data: existing, error: dataError } = await supabase
-    .from("resource-views")
+    .from("resource_views")
     .select("*")
     .eq("user_id", user.id)
     .eq("resource_id", resourceId);
@@ -48,7 +48,7 @@ export async function POST(
   // No overriding existing data to preserve the timestamp
   if (existing.length === 0) {
     const { error } = await supabase
-      .from("resource-views")
+      .from("resource_views")
       .upsert({ user_id: user.id, resource_id: resourceId });
 
     if (error) {
@@ -69,21 +69,6 @@ export async function POST(
   }
 
   return NextResponse.json({ views: data.view_count });
-
-  /*Uncomment in case above doesn't work 
-  const { data: view, error: error } = await supabase
-    .from("resources_views")
-    .select("*")
-    .eq("resource_id", resourceId);
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json({
-    data: {
-      views: view.length,
-    },
-  });
-  */
 }
 
 // I hate Javascript
