@@ -178,7 +178,7 @@ export async function GET(request: Request) {
     let query = supabase
         .from("resources_with_stats")
         .select(`
-            id, title, createdAt:created_at, likes, dislikes, views:view_count, 
+            id, title, fileType:file_type, createdAt:created_at, likes, dislikes, views:view_count, 
             previewImage:preview_image, course_id, course_code, uploader_id, uploader_name
             `);
 

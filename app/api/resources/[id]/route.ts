@@ -34,7 +34,7 @@ export async function GET(
   const { data: resource, error } = await supabase
     .from("resources_with_stats")
     .select(`
-      id, title, description, url, 
+      id, title, fileType:file_type, description, url, 
       course_id, course_code, uploader_id, uploader_name, 
       likes, dislikes, view_count,
       created_at, preview_title, preview_image
@@ -70,6 +70,7 @@ export async function GET(
     resource:{
       id: resource.id,
       title: resource.title,
+      fileType: resource.fileType,
       description: resource.description,
       url: resource.url,
       createdAt: new
