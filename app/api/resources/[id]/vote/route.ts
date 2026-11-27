@@ -1,7 +1,7 @@
 /*********************************
  * Developer: Eric Li
  * First Written: 19/11/2026
- * Last updated: 19/11/2026
+ * Last updated: 27/11/2026
  *
  * Handles the Like/Dislike system and communicates with the backend database
  *
@@ -69,8 +69,25 @@ export async function POST(
   }
 
   //Update the database
+  //Delete a vote
   if (value === 0) {
-    //Delete a vote
+    //Check if resource exists
+    const { data: existing, error: fetchError } = await supabase
+      .from("votes")
+      .select("*")
+      .match({ user_id: user.id, resource_id: resourceId });
+
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    }
+    if (existing.length === 0) {
+      return NextResponse.json(
+        { error: `Resource with ID ${resourceId} not found` },
+        { status: 404 },
+      );
+    }
+
+    //Delete the vote
     const { error } = await supabase
       .from("votes")
       .delete()
@@ -91,7 +108,10 @@ export async function POST(
 
     // 23503 = foreign key violation: no resource has this ID
     if (error?.code === "23503") {
-      return NextResponse.json({ error: "Resource not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: `Resource with ID ${resourceId} not found` },
+        { status: 404 },
+      );
     }
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
