@@ -1,3 +1,5 @@
+// Author: Alan Yu
+
 type LinkPreview = {
   title: string | null;
   image: string | null;
