@@ -8,7 +8,6 @@
 
 import { NextResponse, NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getMetadataVaryParamsAccumulator } from "next/dist/server/app-render/vary-params";
 
 // Packet Format: "GET /api/courses?q=comp&mine=true"
 // where "q" is the search query and
@@ -18,7 +17,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
 
   //If no course query provided, return all courses
-  const q = searchParams.get("q") ?? "";
+  const q = (searchParams.get("q") ?? "").trim();
   const mine = (searchParams.get("mine") ?? "false") === "true";
 
   //Obtain user
@@ -46,15 +45,22 @@ export async function GET(request: NextRequest) {
   //Get array of courseIDs
   const courseIDs = enrollments.map((enrollment) => enrollment.course_id);
 
+  //Not enrolled in anything, so "mine" has nothing to return
+  if (mine && courseIDs.length === 0) {
+    return NextResponse.json({ courses: [] });
+  }
+
   //Build the SQL query
-  let query = supabase.from("courses").select("id, code, title");
+  let query = supabase.from("courses").select("id, code, title").order("code");
 
   //Filter by input parameters
   if (mine) {
     query = query.in("id", courseIDs);
   }
   if (q !== "") {
-    query = query.ilike("code", `${q}%`);
+    //Escape %, _ and \ so they're matched literally instead of as wildcards
+    const term = q.replace(/[\\%_]/g, "\\$&");
+    query = query.ilike("code", `${term}%`);
   }
 
   //Query the database
@@ -68,7 +74,8 @@ export async function GET(request: NextRequest) {
     following: courseIDs.includes(course.id),
   }));
 
-  return NextResponse.json(coursesWithFollowing);
+  //Wrapped in { courses } to match the API contract (#3)
+  return NextResponse.json({ courses: coursesWithFollowing });
 }
 
 // I hate Javascript
