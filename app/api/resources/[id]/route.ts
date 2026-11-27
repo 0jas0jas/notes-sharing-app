@@ -1,3 +1,5 @@
+// Author: Alan Yu
+
 import { createClient } from "@/lib/supabase/server";
 
 function isValidResourceId(id: string): boolean {
