@@ -8,6 +8,7 @@ Our database is Supabase Postgres. All of it is defined by the SQL files in this
 | `02_policies.sql` | Row Level Security: who can read and change what |
 | `03_seed.sql` | Starter McGill courses for the demo |
 | `04_remove_mcgill_trigger.sql` | Removes the McGill trigger from `01` (the auth hook replaces it) |
+| `05_add_file_type.sql` | Adds `resources.file_type` and rebuilds the `resources_with_stats` view |
 | `checkifmcgill.sql` | The McGill-only sign-up check, used as a Supabase auth hook |
 
 ---
@@ -19,12 +20,13 @@ Our database is Supabase Postgres. All of it is defined by the SQL files in this
 3. Paste `02_policies.sql` and run it.
 4. Paste `03_seed.sql` and run it.
 5. Paste `04_remove_mcgill_trigger.sql` and run it.
-6. Paste `checkifmcgill.sql` and run it.
-7. Dashboard → **Authentication → Hooks** → add a **Before User Created** hook → type **Postgres** → schema `public` → function `hook_mcgill_email_only`. **This step is manual. Without it, anyone can sign up.**
+6. Paste `05_add_file_type.sql` and run it.
+7. Paste `checkifmcgill.sql` and run it.
+8. Dashboard → **Authentication → Hooks** → add a **Before User Created** hook → type **Postgres** → schema `public` → function `hook_mcgill_email_only`. **This step is manual. Without it, anyone can sign up.**
 
 Order matters: policies need the tables, and the seed needs `courses`.
 
-`01` and `02` can only run **once** on a fresh database. Running them again errors with "already exists". `03`, `04` and `checkifmcgill.sql` are safe to re-run.
+`01`, `02` and `05` can only run **once** on a fresh database. Running them again errors with "already exists". `03`, `04` and `checkifmcgill.sql` are safe to re-run.
 
 ---
 
@@ -99,6 +101,7 @@ A shared link for a course.
 | `description` | text | ≤ 1000 chars, defaults to `''` |
 | `url` | text | Must start with `http://` or `https://`, ≤ 2048 chars |
 | `link_type` | text | One of `drive_file`, `drive_folder`, `google_doc`, `google_slides`, `google_sheet`, `other` |
+| `file_type` | text | What the file is, picked on the share form. One of `PDF`, `DOCX`, `PPTX`, `ZIP`, `IMAGE`, `FOLDER`, `OTHER` (uppercase, as the API sends it). Defaults to `OTHER` |
 | `preview_title` | text | From Microlink, nullable |
 | `preview_image` | text | From Microlink, nullable |
 | `created_at` | timestamptz | |
@@ -197,7 +200,7 @@ const { data } = await supabase
 
 // Share a resource (uploader_id is set automatically)
 const { error } = await supabase.from("resources").insert({
-  course_id, title, description, url, link_type,
+  course_id, title, description, url, link_type, file_type,
   preview_title, preview_image,
 });
 if (error?.code === "23505") { /* already shared in this course */ }
@@ -224,7 +227,7 @@ await supabase
 
 ## Starting over (dev only)
 
-To wipe everything and re-run the setup steps from 2 to 5, run this in the SQL Editor. The auth hook isn't touched, so steps 6 and 7 don't need repeating. **It deletes all data.**
+To wipe everything and re-run the setup steps from 2 to 6, run this in the SQL Editor. The auth hook isn't touched, so steps 7 and 8 don't need repeating. **It deletes all data.**
 
 ```sql
 drop view  if exists public.resources_with_stats;
