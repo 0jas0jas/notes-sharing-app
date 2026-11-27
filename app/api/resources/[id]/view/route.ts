@@ -33,27 +33,22 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Fetch existing data
-
-  const { data: existing, error: dataError } = await supabase
+  // Record the view. ignoreDuplicates turns this into ON CONFLICT DO NOTHING,
+  // so a repeat view keeps the original row (and timestamp) in one query,
+  // with no race between checking and inserting.
+  const { error: insertError } = await supabase
     .from("resource_views")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("resource_id", resourceId);
+    .upsert(
+      { user_id: user.id, resource_id: resourceId },
+      { onConflict: "user_id,resource_id", ignoreDuplicates: true },
+    );
 
-  if (dataError) {
-    return NextResponse.json({ error: dataError.message }, { status: 500 });
+  // 23503 = foreign key violation: no resource has this ID
+  if (insertError?.code === "23503") {
+    return NextResponse.json({ error: "Resource not found" }, { status: 404 });
   }
-
-  // No overriding existing data to preserve the timestamp
-  if (existing.length === 0) {
-    const { error } = await supabase
-      .from("resource_views")
-      .upsert({ user_id: user.id, resource_id: resourceId });
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+  if (insertError) {
+    return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
   // Return resource count
