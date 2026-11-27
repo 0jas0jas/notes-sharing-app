@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
-function isValidResourceId(id: string):
-boolean {
-  if(!/^\d+$/.test(id)) return false;
+function isValidResourceId(id: string): boolean {
+  if (!/^\d+$/.test(id)) return false;
 
   // A PostgreSQL bigint ID can exceed JavaScript's safe integer range.
   const value = BigInt(id);
@@ -18,8 +17,7 @@ export async function GET(
   // Use the caller's session cookies so the query follows their database permissions.
   const supabase = await createClient();
 
-  const { data: authData } = await
-  supabase.auth.getClaims();
+  const { data: authData } = await supabase.auth.getClaims();
   // The token's subject (sub) is the signed-in user's ID.
   const currentUserId = authData?.claims.sub;
 
@@ -34,8 +32,8 @@ export async function GET(
   const { data: resource, error } = await supabase
     .from("resources_with_stats")
     .select(`
-      id, title, fileType:file_type, description, url, 
-      course_id, course_code, uploader_id, uploader_name, 
+      id, title, fileType:file_type, description, url,
+      course_id, course_code, uploader_id, uploader_name,
       likes, dislikes, view_count,
       created_at, preview_title, preview_image
     `)
@@ -73,8 +71,7 @@ export async function GET(
       fileType: resource.fileType,
       description: resource.description,
       url: resource.url,
-      createdAt: new
-      Date(resource.created_at).toISOString(),
+      createdAt: new Date(resource.created_at).toISOString(),
       previewTitle: resource.preview_title,
       previewImage: resource.preview_image,
       uploader: {
@@ -93,7 +90,7 @@ export async function GET(
       },
     },
   });
-};
+}
 
 
 export async function DELETE(
