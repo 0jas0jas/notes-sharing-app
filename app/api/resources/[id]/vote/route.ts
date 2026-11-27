@@ -62,7 +62,9 @@ export async function POST(
 
   const { value } = body;
 
-  if (value != -1 && value != 0 && value != 1) {
+  // Use strict !== so values like "1", "0" or true are rejected instead of
+  // being loosely converted to numbers.
+  if (value !== -1 && value !== 0 && value !== 1) {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }
 
@@ -87,6 +89,10 @@ export async function POST(
       { onConflict: "user_id,resource_id" },
     );
 
+    // 23503 = foreign key violation: no resource has this ID
+    if (error?.code === "23503") {
+      return NextResponse.json({ error: "Resource not found" }, { status: 404 });
+    }
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
